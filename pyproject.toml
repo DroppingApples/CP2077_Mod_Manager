@@ -1,0 +1,22 @@
+[project]
+name = "cp2077-mod-manager"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "PerJakobNilsson", email = "per.jakob.nilsson@pm.me" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "ipython>=9.18.1",
+    "requests>=2.34.2",
+    "sqlalchemy>=2.1.8",
+]
+
+[project.scripts]
+cp2077-mod-manager = "cp2077_mod_manager:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
