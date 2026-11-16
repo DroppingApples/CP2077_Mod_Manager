@@ -32,7 +32,7 @@ from constants import (
 
 
 class M3Window(QMainWindow):
-    """Mod manager main window"""
+    """The View class for Minimal Mod Manager"""
 
     def __init__(self):
         super().__init__()
@@ -49,7 +49,6 @@ class M3Window(QMainWindow):
         self._create_log_view()
         self._create_search_results_view()
         self._create_search_line()
-        self._create_search_button()
         self._create_search_button()
         self._create_progress_bar()
 
@@ -97,6 +96,7 @@ class M3Window(QMainWindow):
         )
 
     def _create_progress_bar(self) -> None:
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(PROGRESS_BAR_HEIGHT)
         self.progress_bar.setFixedWidth(PROGRESS_BAR_WIDTH)

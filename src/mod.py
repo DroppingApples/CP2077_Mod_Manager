@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import NewType
 
 Dependency = NewType("Dependency", "Mod")
-Tree = NewType("Tree", set[Path])
+TreeSet = NewType("TreeSet", set[Path])
 
 class Mod:
     def __init__(self, name, scoped_id, version):
