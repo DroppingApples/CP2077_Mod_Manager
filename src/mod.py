@@ -4,6 +4,7 @@ from typing import NewType
 Dependency = NewType("Dependency", "Mod")
 TreeSet = NewType("TreeSet", set[Path])
 
+
 class Mod:
     def __init__(self, name, scoped_id, version):
         self.name: str = name

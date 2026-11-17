@@ -21,7 +21,9 @@ class SearchResult(TypedDict):
 
 class Model:
     """The Model class for Minimal Mod Manager"""
-
+    def __init__(self, install_folder:str = ""):
+        self.install_folder: str = ""
+        
     def get_api_key(self) -> str:
         load_dotenv(".env")
         api_key: str | None = os.getenv("NEXUS_API_KEY")
@@ -75,7 +77,7 @@ class Model:
         return search_results
 
     def get_mod_file(self, searchres: SearchResult, verbose=False) -> Mod:
-
+        print("Downloading mod", searchres["name"])
         mod_name, scoped_id = searchres["name"], searchres["scoped_id"]
         # Gets main file
         list_files_url: str = f"{API_BASE_URL}/v1/games/{GAME_DOMAIN}/mods/{scoped_id}/files.json?category=main"
@@ -112,10 +114,9 @@ class Model:
         )
         downloaded_file_path = Path.cwd() / f"{DOWNLOADS_DIR}/{mod_name}.zip"
 
-        try:
-            with downloaded_file_path.open("x"):
-                downloaded_file_path.write_bytes(zip_resp.content)
-        except FileExistsError:
-            print(f"Mod '{mod_name}' already found in Downloads folder. Aborting...")
+
+        with downloaded_file_path.open("x"):
+            downloaded_file_path.write_bytes(zip_resp.content)
+
 
         return Mod(mod_name, scoped_id, mod_version)

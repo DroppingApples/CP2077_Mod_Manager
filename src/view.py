@@ -1,6 +1,8 @@
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import (
     QApplication,
+    QDialog,
+    QFileDialog,
     QGridLayout,
     QLayout,
     QLineEdit,
@@ -44,16 +46,9 @@ class M3Window(QMainWindow):
         centralWidget: QWidget = QWidget(self)
         centralWidget.setLayout(self._general_layout)
         self.setCentralWidget(centralWidget)
-
-        self._create_mod_list_view()
-        self._create_log_view()
-        self._create_search_results_view()
-        self._create_search_line()
-        self._create_search_button()
-        self._create_progress_bar()
-
         self.status_bar: QStatusBar = self.statusBar()  # ty: ignore[invalid-assignment]
-        self.status_bar.addPermanentWidget(self.progress_bar, stretch=1)  # ty: ignore[missing-union-attribute]
+
+        self._create_widgets()
 
     def _create_mod_list_view(self) -> None:
         self.mod_list_view = QListWidget()
@@ -100,3 +95,34 @@ class M3Window(QMainWindow):
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(PROGRESS_BAR_HEIGHT)
         self.progress_bar.setFixedWidth(PROGRESS_BAR_WIDTH)
+
+    def _create_download_button(self) -> None:
+        self.download_button = QPushButton()
+        self.download_button.setText("Download Mod")
+        self.download_button.setFixedHeight(BUTTON_HEIGHT)
+        self.download_button.setFixedWidth(BUTTON_WIDTH)
+        self._search_and_get_layout.addWidget(
+            self.download_button, 0, Qt.AlignmentFlag.AlignTop
+        )
+
+    def _create_game_folder_button(self) -> None:
+        self.game_folder_button = QPushButton()
+        self.game_folder_button.setText("Set game folder...")
+        self.game_folder_button.setFixedHeight(BUTTON_HEIGHT)
+        self.game_folder_button.setFixedWidth(BUTTON_WIDTH)
+        self._search_and_get_layout.addWidget(self.game_folder_button)
+
+    def _create_file_dialog(self) -> None:
+        self.file_dialog = QFileDialog(self, "Select Game Root Install folder")
+        self.file_dialog.setFileMode(QFileDialog.FileMode.Directory)
+
+    def _create_widgets(self) -> None:
+        self._create_mod_list_view()
+        self._create_log_view()
+        self._create_search_results_view()
+        self._create_search_line()
+        self._create_search_button()
+        self._create_download_button()
+        self._create_progress_bar()
+        self._create_game_folder_button()
+        self.status_bar.addPermanentWidget(self.progress_bar)  # ty: ignore[missing-union-attribute]

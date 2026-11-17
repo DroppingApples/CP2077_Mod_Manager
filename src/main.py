@@ -17,5 +17,6 @@ def main() -> None:
     _ = M3(m3_model, m3_window)
     sys.exit(m3_app.exec())
 
+
 if __name__ == "__main__":
     main()
