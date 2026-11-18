@@ -1,7 +1,10 @@
 API_BASE_URL = "https://api.nexusmods.com"
 
 GAME_DOMAIN = "cyberpunk2077"
+
 DOWNLOADS_DIR = "./Downloads/"
+DB_DIR = "./db/"
+DB_FILE = f"{DB_DIR}M3.db"
 
 DEFAULT_WINDOW_WIDTH = 1600
 DEFAULT_WINDOW_HEIGHT = 900

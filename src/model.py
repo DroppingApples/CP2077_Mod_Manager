@@ -21,9 +21,10 @@ class SearchResult(TypedDict):
 
 class Model:
     """The Model class for Minimal Mod Manager"""
-    def __init__(self, install_folder:str = ""):
+
+    def __init__(self, install_folder: str = ""):
         self.install_folder: str = ""
-        
+
     def get_api_key(self) -> str:
         load_dotenv(".env")
         api_key: str | None = os.getenv("NEXUS_API_KEY")
@@ -31,7 +32,13 @@ class Model:
             raise RuntimeError("Warning! Stored Nexus API Key is invalid!")
         return api_key
 
-    def read_archive(self, mod_name) -> TreeSet:
+    def store_mod_archive(self, archive_contents: bytes, mod_name: str) -> None:
+        archive_path = Path.cwd() / f"{DOWNLOADS_DIR}/{mod_name}.zip"
+
+        with archive_path.open("x"):
+            archive_path.write_bytes(archive_contents)
+
+    def read_mod_archive(self, mod_name) -> TreeSet:
         mod_path = Path(DOWNLOADS_DIR) / Path(f"{mod_name}.zip")
         archive = zipfile.ZipFile(mod_path, "r")
         file_list: list[str] = archive.namelist()
@@ -71,15 +78,17 @@ class Model:
             }
             search_results.append(search_result)
             if verbose:
-                print(mod["name"])
-                print(mod["game_scoped_id"])
+                print(
+                    "Found mod",
+                    mod["name"],
+                    "with game_scoped_id",
+                    mod["game_scoped_id"],
+                )
 
         return search_results
 
-    def get_mod_file(self, searchres: SearchResult, verbose=False) -> Mod:
-        print("Downloading mod", searchres["name"])
-        mod_name, scoped_id = searchres["name"], searchres["scoped_id"]
-        # Gets main file
+    def get_mod_file_info(self, scoped_id: ScopedId, verbose=False) -> tuple[str, str]:
+        # This url query get "main" file!
         list_files_url: str = f"{API_BASE_URL}/v1/games/{GAME_DOMAIN}/mods/{scoped_id}/files.json?category=main"
 
         list_files_resp: Response = requests.get(
@@ -94,7 +103,9 @@ class Model:
 
         mod_version = parsed_resp["files"][0]["version"]
         file_id: str = parsed_resp["files"][0]["file_id"]
+        return file_id, mod_version
 
+    def get_CDN_url(self, scoped_id: str, file_id: str, verbose=False) -> str:
         download_links_url = f"{API_BASE_URL}/v1/games/{GAME_DOMAIN}/mods/{scoped_id}/files/{file_id}/download_link.json"
         list_files_resp: Response = requests.get(
             download_links_url, headers={"apikey": self.get_api_key()}
@@ -105,18 +116,29 @@ class Model:
                 "FOUND DOWNLOAD LINKS\n-----------------------\n\n",
                 json.dumps(parsed_resp, sort_keys=True, indent=4),
             )
-        # Servers are sorted by performance metrics in desc order
-        preferred_server_url = parsed_resp[0]["URI"]
-        print(preferred_server_url)
+        # Servers are sorted by performance metrics in desc order, so pick first one
+        CDN_server_url = parsed_resp[0]["URI"]
+        if verbose:
+            print("Preferred server URL:", CDN_server_url)
 
+        return CDN_server_url
+
+    def get_zip_file(self, CDN_server_url: str) -> bytes:
         zip_resp: Response = requests.get(
-            preferred_server_url, headers={"apikey": self.get_api_key()}
+            CDN_server_url, headers={"apikey": self.get_api_key()}
         )
-        downloaded_file_path = Path.cwd() / f"{DOWNLOADS_DIR}/{mod_name}.zip"
+        return zip_resp.content
 
+    def download_mod(self, search_result: SearchResult, verbose=False) -> Mod:
+        if verbose:
+            print("Downloading mod", search_result["name"])
+        mod_name, scoped_id = search_result["name"], search_result["scoped_id"]
+        file_id, mod_version = self.get_mod_file_info(scoped_id)
 
-        with downloaded_file_path.open("x"):
-            downloaded_file_path.write_bytes(zip_resp.content)
+        CDN_server_url = self.get_CDN_url(scoped_id, file_id)
 
+        archive_contents: bytes = self.get_zip_file(CDN_server_url)
+
+        self.store_mod_archive(archive_contents, mod_name)
 
         return Mod(mod_name, scoped_id, mod_version)

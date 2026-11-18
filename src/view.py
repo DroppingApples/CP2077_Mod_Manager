@@ -1,16 +1,12 @@
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QApplication,
-    QDialog,
     QFileDialog,
     QGridLayout,
-    QLayout,
     QLineEdit,
     QListWidget,
     QMainWindow,
     QProgressBar,
     QPushButton,
-    QScrollArea,
     QStatusBar,
     QVBoxLayout,
     QWidget,

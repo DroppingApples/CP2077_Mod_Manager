@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QDialog, QFileDialog
+from PyQt6.QtWidgets import QDialog
 
+from mod import Mod
 from model import Model, SearchResult
 from view import M3Window
 
@@ -84,7 +85,8 @@ class M3:
             res for res in self.search_results if res["name"] == selected_mod_name
         )
         try:
-            self._model.get_mod_file(selected_search_result)
+            # TODO: Store mod in
+            mod: Mod = self._model.download_mod(selected_search_result)
             self._view.mod_list_view.addItem(selected_search_result["name"])
         except FileExistsError:
             self._view.log_view.addItem("Download failed, mod already downloaded.")
