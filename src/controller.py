@@ -1,3 +1,5 @@
+"""The Controller class for Minimal Mod Manager (M3)."""
+
 from PyQt6.QtWidgets import QDialog
 
 from mod import Mod
@@ -6,9 +8,10 @@ from view import M3Window
 
 
 class M3:
-    """The Controller class for Minimial Mod Manager"""
+    """The Controller class for Minimial Mod Manager."""
 
     def __init__(self, model: Model, view: M3Window) -> None:
+        """Initialize the M3 class."""
         self._model: Model = model
         self._view: M3Window = view
         self.search_results: list[SearchResult] = []
@@ -32,11 +35,12 @@ class M3:
         self._view.game_folder_button.clicked.connect(self._set_game_folder)
 
     def _set_game_folder(self) -> None:
-        self._view._create_file_dialog()
+        self._view.create_file_dialog()
         if self._view.file_dialog.exec() == QDialog.DialogCode.Accepted:
-            self._model.install_folder = self._view.file_dialog.selectedFiles()[0]
+            self._model.install_folder = \
+                self._view.file_dialog.selectedFiles()[0]
             self._view.log_view.addItem(
-                f"Game root folder set to {self._model.install_folder}"
+                f"Game root folder set to {self._model.install_folder}",
             )
 
     def _read_search_line(self) -> str | None:
@@ -56,7 +60,8 @@ class M3:
         self._clear_search_results_view()
         if self.search_results:
             for result in self.search_results:
-                print("Adding mod name", result["name"], " to search results view")
+                print("Adding mod name", result["name"],
+                " to search results view")
                 self._view.search_results_view.addItem(result["name"])
 
     def _search_for_mods_handler(self) -> None:
@@ -66,7 +71,7 @@ class M3:
             print("No query provided, search aborted")
             return
         print("Searching for mods with query", query)
-        self.search_results: list[SearchResult] = self._model.search_mods(query)
+        self.search_results= self._model.search_mods(query)
 
         if not self.search_results:
             print("No search results, aborting")
@@ -75,18 +80,22 @@ class M3:
         self._set_search_results_view()
 
     def _download_mod_handler(self) -> None:
-        # Assumes that currently selected item in view's search result view
-        # is the same index as list[Searchresults] acquired in self._search_for_mods_handler
+        # Assumes currently selected item in view's search result view
+        # is the same index as list[Searchresults] acquired in
+        # self._search_for_mods_handler
         current_item = self._view.search_results_view.currentItem()
         if not current_item:
             return
         selected_mod_name: str = current_item.text()
         selected_search_result: SearchResult = next(
-            res for res in self.search_results if res["name"] == selected_mod_name
+            res for res in self.search_results \
+                if res["name"] == selected_mod_name
         )
         try:
-            # TODO: Store mod in
+            # TODO: Store mod in db
             mod: Mod = self._model.download_mod(selected_search_result)
             self._view.mod_list_view.addItem(selected_search_result["name"])
         except FileExistsError:
-            self._view.log_view.addItem("Download failed, mod already downloaded.")
+            self._view.log_view.addItem(
+                "Download failed, mod already downloaded.",
+                )

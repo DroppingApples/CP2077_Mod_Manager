@@ -1,3 +1,5 @@
+"""Mod class for representing individual mods."""
+
 from pathlib import Path
 from typing import NewType
 

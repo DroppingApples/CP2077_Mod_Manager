@@ -1,3 +1,5 @@
+"""The View class for Minimal Mod Manager (M3)."""
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QFileDialog,
@@ -18,30 +20,41 @@ from constants import (
     DEFAULT_LOG_HEIGHT,
     DEFAULT_MOD_LIST_HEIGHT,
     DEFAULT_SEARCH_HEIGHT,
-    DEFAULT_WINDOW_HEIGHT,
-    DEFAULT_WINDOW_WIDTH,
     LINE_EDIT_HEIGHT,
     LINE_EDIT_WIDTH,
-    MINIMUM_WINDOW_HEIGHT,
-    MINIMUM_WINDOW_WIDTH,
     PROGRESS_BAR_HEIGHT,
     PROGRESS_BAR_WIDTH,
 )
 
 
+def get_rgb_from_hex(code):
+    """Get rgb Qcolor value from HEX"""
+    code_hex = code.replace("#", "")
+    rgb = tuple(int(code_hex[i : i + 2], 16) for i in (0, 2, 4))
+    return QColor.fromRgb(rgb[0], rgb[1], rgb[2])
+
+
 class M3Window(QMainWindow):
-    """The View class for Minimal Mod Manager"""
+    """The View class for Minimal Mod Manager."""
 
     def __init__(self):
+        """Initialize the M3Window class.
+
+        This method initializes the M3Window class, sets the window
+        title, creates the general layout, and calls the _create_widgets
+        method to create the widgets for the window.
+        """
         super().__init__()
         self.setWindowTitle("Minimal Mod Manager - Cyberpunk 2077")
-        self._general_layout: QGridLayout = QGridLayout()
+        self._general_layout = QGridLayout()
 
         self._search_and_get_layout = QVBoxLayout()
-        self._general_layout.addLayout(self._search_and_get_layout, 1, 1)
-        centralWidget: QWidget = QWidget(self)
-        centralWidget.setLayout(self._general_layout)
-        self.setCentralWidget(centralWidget)
+        self._general_layout.addLayout(
+            self._search_and_get_layout, 1, 1
+        )
+        central_widget: QWidget = QWidget(self)
+        central_widget.setLayout(self._general_layout)
+        self.setCentralWidget(central_widget)
         self.status_bar: QStatusBar = self.statusBar()  # ty: ignore[invalid-assignment]
 
         self._create_widgets()
@@ -64,7 +77,10 @@ class M3Window(QMainWindow):
         self.search_results_view = QListWidget()
         self.search_results_view.setFixedHeight(DEFAULT_SEARCH_HEIGHT)
         self._general_layout.addWidget(
-            self.search_results_view, 1, 0, Qt.AlignmentFlag.AlignTop
+            self.search_results_view,
+            1,
+            0,
+            Qt.AlignmentFlag.AlignTop,
         )
         self.search_results_view.insertItem(0, "Search result 1")
         self.search_results_view.insertItem(1, "Search result 2")
@@ -74,7 +90,9 @@ class M3Window(QMainWindow):
         self.search_line.setFixedHeight(LINE_EDIT_HEIGHT)
         self.search_line.setFixedWidth(LINE_EDIT_WIDTH)
         self._search_and_get_layout.addWidget(
-            self.search_line, 0, Qt.AlignmentFlag.AlignLeft
+            self.search_line,
+            0,
+            Qt.AlignmentFlag.AlignLeft,
         )
 
     def _create_search_button(self) -> None:
@@ -83,7 +101,9 @@ class M3Window(QMainWindow):
         self.search_button.setFixedHeight(BUTTON_HEIGHT)
         self.search_button.setFixedWidth(BUTTON_WIDTH)
         self._search_and_get_layout.addWidget(
-            self.search_button, 0, Qt.AlignmentFlag.AlignTop
+            self.search_button,
+            0,
+            Qt.AlignmentFlag.AlignTop,
         )
 
     def _create_progress_bar(self) -> None:
@@ -98,7 +118,9 @@ class M3Window(QMainWindow):
         self.download_button.setFixedHeight(BUTTON_HEIGHT)
         self.download_button.setFixedWidth(BUTTON_WIDTH)
         self._search_and_get_layout.addWidget(
-            self.download_button, 0, Qt.AlignmentFlag.AlignTop
+            self.download_button,
+            0,
+            Qt.AlignmentFlag.AlignTop,
         )
 
     def _create_game_folder_button(self) -> None:
@@ -108,8 +130,12 @@ class M3Window(QMainWindow):
         self.game_folder_button.setFixedWidth(BUTTON_WIDTH)
         self._search_and_get_layout.addWidget(self.game_folder_button)
 
-    def _create_file_dialog(self) -> None:
-        self.file_dialog = QFileDialog(self, "Select Game Root Install folder")
+    def create_file_dialog(self) -> None:
+        """Create file dialog for selecting game root install folder."""
+        self.file_dialog = QFileDialog(
+            self,
+            "Select Game Root Install folder",
+        )
         self.file_dialog.setFileMode(QFileDialog.FileMode.Directory)
 
     def _create_widgets(self) -> None:
@@ -121,4 +147,4 @@ class M3Window(QMainWindow):
         self._create_download_button()
         self._create_progress_bar()
         self._create_game_folder_button()
-        self.status_bar.addPermanentWidget(self.progress_bar)  # ty: ignore[missing-union-attribute]
+        self.status_bar.addPermanentWidget(self.progress_bar)
