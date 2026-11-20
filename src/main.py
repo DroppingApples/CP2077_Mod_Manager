@@ -1,4 +1,4 @@
-"""Minimal Mod Manager (M3) app initalization and main function.
+"""Minimal Mod Manager (M3) app initalization module and main function.
 
 description:
     This module contains the main function for the M3 app.
@@ -12,14 +12,12 @@ import sys
 from PyQt6.QtWidgets import QApplication
 
 from controller import M3
-from db import db_init
 from model import Model
 from view import M3Window
 
 
 def main() -> None:
     """M3's main function."""
-    db_init()
     m3_app = QApplication([])
     m3_window = M3Window()
     m3_model = Model()

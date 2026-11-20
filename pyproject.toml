@@ -12,7 +12,7 @@ dependencies = [
     "ipython>=9.18.1",
     "pyqt6>=6.12.1",
     "requests>=2.34.2",
-    "sqlalchemy>=2.1.8",
+    "sqlalchemy>=2.1.9",
 ]
 
 [project.scripts]

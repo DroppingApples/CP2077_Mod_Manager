@@ -1,6 +1,6 @@
-"""The View class for Minimal Mod Manager (M3)."""
+"""The View module for Minimal Mod Manager (M3)."""
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QFileDialog,
     QGridLayout,
@@ -10,16 +10,15 @@ from PyQt6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QStatusBar,
-    QVBoxLayout,
+    QTableWidget,
     QWidget,
 )
 
 from constants import (
     BUTTON_HEIGHT,
     BUTTON_WIDTH,
-    DEFAULT_LOG_HEIGHT,
-    DEFAULT_MOD_LIST_HEIGHT,
-    DEFAULT_SEARCH_HEIGHT,
+    DEFAULT_WINDOW_HEIGHT,
+    DEFAULT_WINDOW_WIDTH,
     LINE_EDIT_HEIGHT,
     LINE_EDIT_WIDTH,
     PROGRESS_BAR_HEIGHT,
@@ -28,7 +27,7 @@ from constants import (
 
 
 def get_rgb_from_hex(code):
-    """Get rgb Qcolor value from HEX"""
+    """Get rgb Qcolor value from HEX."""
     code_hex = code.replace("#", "")
     rgb = tuple(int(code_hex[i : i + 2], 16) for i in (0, 2, 4))
     return QColor.fromRgb(rgb[0], rgb[1], rgb[2])
@@ -46,41 +45,42 @@ class M3Window(QMainWindow):
         """
         super().__init__()
         self.setWindowTitle("Minimal Mod Manager - Cyberpunk 2077")
-        self._general_layout = QGridLayout()
+        self._central_layout = QGridLayout()
+        self.setFixedSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
 
-        self._search_and_get_layout = QVBoxLayout()
-        self._general_layout.addLayout(
-            self._search_and_get_layout, 1, 1
-        )
         central_widget: QWidget = QWidget(self)
-        central_widget.setLayout(self._general_layout)
+        central_widget.setLayout(self._central_layout)
+        self._central_layout.setVerticalSpacing(50)
         self.setCentralWidget(central_widget)
-        self.status_bar: QStatusBar = self.statusBar()  # ty: ignore[invalid-assignment]
+
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
 
         self._create_widgets()
 
-    def _create_mod_list_view(self) -> None:
-        self.mod_list_view = QListWidget()
-        self.mod_list_view.setFixedHeight(DEFAULT_MOD_LIST_HEIGHT)
-        self._general_layout.addWidget(self.mod_list_view, 0, 0)
-        self.mod_list_view.insertItem(0, "Mod A")
-        self.mod_list_view.insertItem(1, "Mod B")
+    def _create_mod_table(self) -> None:
+        self.mod_table = QTableWidget()
+        self.mod_table.setRowCount(0)
+        self.mod_table.setColumnCount(3)
+        self.mod_table.setHorizontalHeaderLabels(
+            ["Mod Name", "Version", "Status"],
+        )
+        self._central_layout.addWidget(self.mod_table, 0, 0, 2, 2)
 
     def _create_log_view(self) -> None:
         self.log_view = QListWidget()
-        self.log_view.setFixedHeight(DEFAULT_LOG_HEIGHT)
-        self._general_layout.addWidget(self.log_view, 0, 1)
+        self._central_layout.addWidget(self.log_view, 0, 2, 2, 2)
         self.log_view.insertItem(0, "Log message 1")
         self.log_view.insertItem(1, "Log message 2")
 
     def _create_search_results_view(self) -> None:
         self.search_results_view = QListWidget()
-        self.search_results_view.setFixedHeight(DEFAULT_SEARCH_HEIGHT)
-        self._general_layout.addWidget(
+        self._central_layout.addWidget(
             self.search_results_view,
-            1,
+            2,
             0,
-            Qt.AlignmentFlag.AlignTop,
+            1,
+            2,
         )
         self.search_results_view.insertItem(0, "Search result 1")
         self.search_results_view.insertItem(1, "Search result 2")
@@ -89,46 +89,34 @@ class M3Window(QMainWindow):
         self.search_line = QLineEdit()
         self.search_line.setFixedHeight(LINE_EDIT_HEIGHT)
         self.search_line.setFixedWidth(LINE_EDIT_WIDTH)
-        self._search_and_get_layout.addWidget(
-            self.search_line,
-            0,
-            Qt.AlignmentFlag.AlignLeft,
-        )
+        self._central_layout.addWidget(self.search_line, 2, 2)
 
     def _create_search_button(self) -> None:
         self.search_button = QPushButton()
         self.search_button.setText("Search for Mods")
         self.search_button.setFixedHeight(BUTTON_HEIGHT)
         self.search_button.setFixedWidth(BUTTON_WIDTH)
-        self._search_and_get_layout.addWidget(
-            self.search_button,
-            0,
-            Qt.AlignmentFlag.AlignTop,
-        )
+        self._central_layout.addWidget(self.search_button, 2, 3)
 
     def _create_progress_bar(self) -> None:
-
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(PROGRESS_BAR_HEIGHT)
         self.progress_bar.setFixedWidth(PROGRESS_BAR_WIDTH)
+        self.status_bar.addPermanentWidget(self.progress_bar)
 
     def _create_download_button(self) -> None:
         self.download_button = QPushButton()
         self.download_button.setText("Download Mod")
         self.download_button.setFixedHeight(BUTTON_HEIGHT)
         self.download_button.setFixedWidth(BUTTON_WIDTH)
-        self._search_and_get_layout.addWidget(
-            self.download_button,
-            0,
-            Qt.AlignmentFlag.AlignTop,
-        )
+        self._central_layout.addWidget(self.download_button, 3, 2)
 
     def _create_game_folder_button(self) -> None:
         self.game_folder_button = QPushButton()
         self.game_folder_button.setText("Set game folder...")
         self.game_folder_button.setFixedHeight(BUTTON_HEIGHT)
         self.game_folder_button.setFixedWidth(BUTTON_WIDTH)
-        self._search_and_get_layout.addWidget(self.game_folder_button)
+        self._central_layout.addWidget(self.game_folder_button, 3, 3)
 
     def create_file_dialog(self) -> None:
         """Create file dialog for selecting game root install folder."""
@@ -139,7 +127,7 @@ class M3Window(QMainWindow):
         self.file_dialog.setFileMode(QFileDialog.FileMode.Directory)
 
     def _create_widgets(self) -> None:
-        self._create_mod_list_view()
+        self._create_mod_table()
         self._create_log_view()
         self._create_search_results_view()
         self._create_search_line()
@@ -147,4 +135,3 @@ class M3Window(QMainWindow):
         self._create_download_button()
         self._create_progress_bar()
         self._create_game_folder_button()
-        self.status_bar.addPermanentWidget(self.progress_bar)
