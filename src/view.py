@@ -37,7 +37,8 @@ class M3Window(QMainWindow):
     """The View class for Minimal Mod Manager."""
 
     def __init__(self):
-        """Initialize the M3Window class.
+        """
+        Initialize the M3Window class.
 
         This method initializes the M3Window class, sets the window
         title, creates the general layout, and calls the _create_widgets
@@ -53,10 +54,20 @@ class M3Window(QMainWindow):
         self._central_layout.setVerticalSpacing(50)
         self.setCentralWidget(central_widget)
 
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
+        self._status_bar = QStatusBar()
+        self.setStatusBar(self._status_bar)
 
         self._create_widgets()
+
+    def _create_widgets(self) -> None:
+        self._create_mod_table()
+        self._create_log_view()
+        self._create_search_results_view()
+        self._create_search_line()
+        self._create_search_button()
+        self._create_download_button()
+        self._create_progress_bar()
+        self._create_game_folder_button()
 
     def _create_mod_table(self) -> None:
         self.mod_table = QTableWidget()
@@ -102,7 +113,7 @@ class M3Window(QMainWindow):
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(PROGRESS_BAR_HEIGHT)
         self.progress_bar.setFixedWidth(PROGRESS_BAR_WIDTH)
-        self.status_bar.addPermanentWidget(self.progress_bar)
+        self._status_bar.addPermanentWidget(self.progress_bar)
 
     def _create_download_button(self) -> None:
         self.download_button = QPushButton()
@@ -125,13 +136,3 @@ class M3Window(QMainWindow):
             "Select Game Root Install folder",
         )
         self.file_dialog.setFileMode(QFileDialog.FileMode.Directory)
-
-    def _create_widgets(self) -> None:
-        self._create_mod_table()
-        self._create_log_view()
-        self._create_search_results_view()
-        self._create_search_line()
-        self._create_search_button()
-        self._create_download_button()
-        self._create_progress_bar()
-        self._create_game_folder_button()

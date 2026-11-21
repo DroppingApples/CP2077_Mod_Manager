@@ -29,16 +29,34 @@ class SearchResult(TypedDict):
 
 
 class Model:
-    """The Model class for Minimal Mod Manager."""
+    """
+    The Model class for Minimal Mod Manager.
+
+    Attributes
+    ----------
+    install_folder: str
+        The absolute path to the root game folder.
+    mods: list of Mod
+        List of mod objects to manage as used by controller.
+
+    """
 
     def __init__(self):
-        """Initialize the Model class."""
+        """Initialize Model class."""
         self.install_folder: str = ""
         self.mods: list[Mod] = []
         self.populate_mods()
 
     def get_api_key(self) -> str:
-        """Get the Nexus API key from the .env file."""
+        """
+        Get Nexus API key from .env file.
+
+        Returns
+        -------
+        str
+            The API key used for auth.
+
+        """
         load_dotenv(".env")
         api_key: str | None = os.getenv("NEXUS_API_KEY")
         if api_key is None:
@@ -48,18 +66,17 @@ class Model:
             )
         return api_key
 
-    def populate_mods(self):
+    def populate_mods(self) -> None:
         """Read Download folder and append mods to model.mods member."""
         for file_path in Path(DOWNLOADS_DIR).iterdir():
-            # Awful hack, enforce that Downloads/ and zip is stripped
-            #  from path
+            # Awful hack!
+            # "Downloads/"" and ".zip" are stripped from path
             mod_name, version = str(file_path.with_suffix(""))[
                 10:
             ].rsplit(" V", 1)
             self.mods.append(
                 Mod(mod_name, version),
             )
-            
 
     def store_mod_archive(
         self,
@@ -67,7 +84,7 @@ class Model:
         mod_name: str,
         mod_version: str,
     ) -> None:
-        """Store the mod archive in the Downloads directory."""
+        """Store mod archive in the Downloads directory."""
         archive_path = (
             Path.cwd()
             / f"{DOWNLOADS_DIR}/{mod_name} V{mod_version}.zip"
@@ -116,7 +133,20 @@ class Model:
         self,
         scoped_id: ScopedId,
     ) -> tuple[str, str]:
-        """Get file_id and version of the mod with given scoped_id."""
+        """
+        Get file_id and version of mod with given scoped_id.
+
+        Parameters
+        ----------
+        scoped_id : ScopedId
+            Scoped Id string for game scoped mod id.
+
+        Returns
+        -------
+        tuple of str, str:
+            The unique file id and version number of latest file.
+
+        """
         # This url query get "main" file!
         list_files_url: str = f"{API_BASE_URL}/v1/games/{GAME_DOMAIN}/\
 mods/{scoped_id}/files.json?category=main"
@@ -124,18 +154,31 @@ mods/{scoped_id}/files.json?category=main"
         list_files_resp: Response = requests.get(
             list_files_url,
             headers={"apikey": self.get_api_key()},
+            timeout=REQUEST_TIMEOUT,
         )
         parsed_resp: dict = list_files_resp.json()
         mod_version = parsed_resp["files"][0]["version"]
         file_id: str = parsed_resp["files"][0]["file_id"]
         return file_id, mod_version
 
-    def get_cdn_url(
-        self,
-        scoped_id: str,
-        file_id: str,
-    ) -> str:
-        """Get CDN URL for mod with given scoped_id and file_id."""
+    def get_cdn_url(self, scoped_id: ScopedId, file_id: str) -> str:
+        """
+        Get CDN URL for mod with given scoped_id and file_id.
+
+        Parameters
+        ----------
+        scoped_id : ScopedId
+            Scoped Id type string for game scoped mod id.
+
+        file_id : str
+            A unique file id integer held as string.
+
+        Returns
+        -------
+        str
+            Http URL to CDN server hosting the file.
+
+        """
         download_links_url = f"{API_BASE_URL}/v1/games/{GAME_DOMAIN}/\
 mods/{scoped_id}/files/{file_id}/download_link.json"
         list_files_resp: Response = requests.get(
@@ -145,11 +188,24 @@ mods/{scoped_id}/files/{file_id}/download_link.json"
         )
         parsed_resp: dict = list_files_resp.json()
         # Servers are sorted by performance metrics in desc order,
-        # so pick first one
+        # so [0] picks probable best choice.
         return parsed_resp[0]["URI"]
 
     def get_zip_file(self, cdn_server_url: str) -> bytes:
-        """Get the zip file from the CDN server URL."""
+        """
+        Get the zip file from the CDN server URL.
+
+        Parameters
+        ----------
+        cdn_server_url : str
+            HTTP URL to mod arhcive file hosted on CDN server.
+
+        Returns
+        -------
+        bytes:
+            The zip binary contents of HTTP response.
+
+        """
         zip_resp: Response = requests.get(
             cdn_server_url,
             headers={"apikey": self.get_api_key()},
@@ -158,7 +214,19 @@ mods/{scoped_id}/files/{file_id}/download_link.json"
         return zip_resp.content
 
     def download_mod(self, search_result: SearchResult) -> Mod:
-        """Download mod from Nexus Mods using provided search result."""
+        """
+        Download mod from Nexus Mods using provided search result.
+
+        Parameters
+        ----------
+        search_result : SearchResult
+            SearchResult tuple holding mod name and scoped id.
+
+        Returns
+        -------
+        Mod:
+            New object containing metadata about downloaded mod.
+        """
         mod_name, scoped_id = (
             search_result["name"],
             search_result["scoped_id"],
