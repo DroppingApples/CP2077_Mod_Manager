@@ -1,4 +1,5 @@
-"""Minimal Mod Manager (M3) app initalization module and main function.
+"""
+Minimal Mod Manager (M3) app initalization module and main function.
 
 description:
     This module contains the main function for the M3 app.

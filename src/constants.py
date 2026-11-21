@@ -1,5 +1,4 @@
 """Constants for Minimal Mod Manager (M3)."""
-from pathlib import Path
 
 API_BASE_URL = "https://api.nexusmods.com"
 
@@ -9,12 +8,10 @@ GAME_DOMAIN = "cyberpunk2077"
 
 DOWNLOADS_DIR = "./Downloads/"
 
-### Database
+### "Database"
 DB_DIR = "./db/"
-DB_FILE = f"{DB_DIR}M3.db"
-DB_DIR_PATH = Path(DB_DIR)
-DB_FILE_PATH = Path(DB_FILE)
-CONNECTION = "qt_sql_m3_con"
+DB_GAME_INSTALL_PATH = f"{DB_DIR}game_install_path"
+DB_MODS_CSV_PATH = f"{DB_DIR}mod_list.csv"
 
 COLORS = {
     "Red": "#FF0000",
