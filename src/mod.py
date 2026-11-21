@@ -1,7 +1,7 @@
 """Mod class for representing individual mods."""
 
 import zipfile
-from enum import IntFlag, auto
+from enum import Enum
 from pathlib import Path
 from typing import NewType
 
@@ -11,26 +11,40 @@ Dependency = NewType("Dependency", "Mod")
 TreeSet = NewType("TreeSet", set[Path])
 
 
-class ModStatus(IntFlag):
-    """Set status of mod."""
+class InstallStatus(Enum):
+    """Set install status of mod."""
 
-    NOT_INSTALLED = auto()
-    INSTALLED = auto()
-    NOT_ONDISK = auto()
-    ONDISK = auto()
+    NOT_INSTALLED = "No"
+    INSTALLED = "Yes"
 
+
+class DownloadStatus(Enum):
+    """Set download status on mod archive."""
+
+    NOT_ONDISK = "Not on Disk"
+    ONDISK = "On Disk"
+
+
+type ModStatus = dict[str, InstallStatus | DownloadStatus]
 
 
 class Mod:
     """Mod class for Minimal Mod Manager (M3)."""
 
-    def __init__(self, name, version=None):
-        """Set mod name, version scoped id and status."""
+    def __init__(
+        self,
+        name,
+        version=None,
+        install_status: InstallStatus = InstallStatus.NOT_INSTALLED,
+        download_status: DownloadStatus = DownloadStatus.ONDISK,
+    ):
+        """Set mod name, version, scoped id, status and dir tree."""
         self.name: str = name
         self.version: str | None = version
-        self.status: ModStatus = (
-            ModStatus.ONDISK | ModStatus.NOT_INSTALLED
-        )
+        self.status: ModStatus = {
+            "install": install_status,
+            "download": download_status,
+        }
         self.tree: set[Path] | None = self.get_mod_tree()
 
     def get_mod_tree(self) -> None:

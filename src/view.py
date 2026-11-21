@@ -26,10 +26,25 @@ from constants import (
 )
 
 
-def get_rgb_from_hex(code):
-    """Get rgb Qcolor value from HEX."""
+def _get_rgb_from_hex(code) -> QColor:
+    """
+    Get rgb Qcolor value from HEX.
+
+    Parameters
+    ----------
+    code : str
+        Hexadecimal code for a specific color.
+
+    Returns
+    -------
+    QColor
+        Object containing a rgb color value.
+
+    """
     code_hex = code.replace("#", "")
-    rgb = tuple(int(code_hex[i : i + 2], 16) for i in (0, 2, 4))
+    rgb: tuple[int, ...] = tuple(
+        int(code_hex[i : i + 2], 16) for i in (0, 2, 4)
+    )
     return QColor.fromRgb(rgb[0], rgb[1], rgb[2])
 
 
@@ -74,27 +89,17 @@ class M3Window(QMainWindow):
         self.mod_table.setRowCount(0)
         self.mod_table.setColumnCount(3)
         self.mod_table.setHorizontalHeaderLabels(
-            ["Mod Name", "Version", "Status"],
+            ["Mod Name", "Version", "Installed?"],
         )
         self._central_layout.addWidget(self.mod_table, 0, 0, 2, 2)
 
     def _create_log_view(self) -> None:
         self.log_view = QListWidget()
         self._central_layout.addWidget(self.log_view, 0, 2, 2, 2)
-        self.log_view.insertItem(0, "Log message 1")
-        self.log_view.insertItem(1, "Log message 2")
 
     def _create_search_results_view(self) -> None:
         self.search_results_view = QListWidget()
-        self._central_layout.addWidget(
-            self.search_results_view,
-            2,
-            0,
-            1,
-            2,
-        )
-        self.search_results_view.insertItem(0, "Search result 1")
-        self.search_results_view.insertItem(1, "Search result 2")
+        self._central_layout.addWidget(self.search_results_view, 2, 0, 1, 2)
 
     def _create_search_line(self) -> None:
         self.search_line = QLineEdit()

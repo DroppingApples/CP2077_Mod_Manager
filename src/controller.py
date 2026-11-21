@@ -1,6 +1,6 @@
 """The Controller class for Minimal Mod Manager (M3)."""
 
-from PyQt6.QtWidgets import QDialog, QTableWidgetItem
+from PyQt6.QtWidgets import QDialog, QListWidgetItem, QTableWidgetItem
 
 from mod import Mod
 from model import Model, SearchResult
@@ -61,7 +61,7 @@ class M3:
         self._view.mod_table.setItem(
             num_rows - 1,
             2,
-            QTableWidgetItem(mod.status.value),
+            QTableWidgetItem(mod.status["install"].value),
         )
         self._view.mod_table.resizeColumnsToContents()
 
@@ -126,7 +126,7 @@ class M3:
     def _set_search_results_view(self) -> None:
         """Populate search results view with new results."""
         self._view.search_results_view.clear()
-        if self.search_results:
+        if self._search_results:
             for result in self.search_results:
                 if result["name"] not in [
                     mod.name for mod in self._model.mods
@@ -155,8 +155,15 @@ class M3:
         self._set_search_results_view()
 
     def _download_mod_handler(self) -> None:
-        """Handle for downloading mod files."""
-        current_item = self._view.search_results_view.currentItem()
+        """
+        Handle for downloading mod files.
+
+        If mod archive exists (File ExistsError),
+        abort and write message to user in log view.
+        """
+        current_item: QListWidgetItem | None = (
+            self._view.search_results_view.currentItem()
+        )
         if not current_item:
             return
         selected_mod_name: str = current_item.text()
